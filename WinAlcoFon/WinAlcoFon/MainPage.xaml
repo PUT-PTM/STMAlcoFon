@@ -6,14 +6,37 @@
     xmlns:local="using:WinAlcoFon"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-    
-    <Grid Background="DarkOrange">
-        <Charting:Chart x:Name="LineChart" HorizontalAlignment="Left" Margin="-5,0,-95,0" VerticalAlignment="Top" Width="455" Height="200">
-            <Charting:LineSeries Margin="0" IndependentValuePath="id" DependentValuePath="wartosc"/>
+    mc:Ignorable="d"
+    Background="DarkOrange">
+
+    <Grid Background="DarkOrange" HorizontalAlignment="Center">
+        <Charting:Chart x:Name="LineChart" HorizontalAlignment="Center" VerticalAlignment="Top" Width="360" Height="250">
+            <Charting:LineSeries Margin="0" IndependentValuePath="id" DependentValuePath="wartosc">
+                <Charting:LineSeries.LegendItemStyle>
+                    <Style TargetType="Charting:LegendItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Charting:LegendItem">
+                                    <Border/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Charting:LineSeries.LegendItemStyle>
+            </Charting:LineSeries>
         </Charting:Chart>
-        <Button x:Name="Odswiez" Content="Start" HorizontalAlignment="Left" Margin="10,210,0,0" VerticalAlignment="Top" Click="Odswiez_Click" Width="75" Height="45"/>
-        <Button x:Name="Zatrzymaj" Content="Stop" HorizontalAlignment="Right" Margin="0,210,10,0" VerticalAlignment="Top" Click="Zatrzymaj_Click" Width="75" Height="45"/>
-        <TextBlock x:Name="CiaglyOdczyt" HorizontalAlignment="Center" Margin="0,210,0,0" TextWrapping="Wrap" Text="Ciągły odczyt" VerticalAlignment="Top"/>
+        <TextBlock x:Name="CiaglyOdczyt" HorizontalAlignment="Left" Margin="10,257,0,0" Text="Ciągły odczyt" VerticalAlignment="Top" FontSize="24"/>
+        <Button x:Name="Start" Content="Start" HorizontalAlignment="Right" Margin="00,250,95,0" VerticalAlignment="Top" Click="Start_Click" Width="75" Height="45"/>
+        <Button x:Name="Stop" Content="Stop" HorizontalAlignment="Right" Margin="0,250,10,0" VerticalAlignment="Top" Click="Stop_Click" Width="75" Height="45"/>
+        <TextBlock x:Name="Wynik_pomocniczy" HorizontalAlignment="Center" Margin="0,320,0,0" TextWrapping="Wrap" Text="wynik pomiaru" VerticalAlignment="Top"/>
+        <TextBlock x:Name="Wynik" HorizontalAlignment="Center" Margin="0,350,0,0" TextWrapping="Wrap" Text="Nie dokonano pomiaru." VerticalAlignment="Top" FontSize="30"/>
+        <Button x:Name="Pomiar" Content="Zacznij pomiar" HorizontalAlignment="Center" Margin="0,410,0,0" VerticalAlignment="Top" Width="175" Height="50" Click="Pomiar_Click"/>
+        <Button x:Name="Kalibruj" Content="Kalibracja czujnika" HorizontalAlignment="Center" Margin="0,470,0,0" VerticalAlignment="Top" Width="175" Height="50" Click="Kalibruj_Click"/>
+        <ProgressBar x:Name="Progres" HorizontalAlignment="Center" Height="30" Margin="0,530,0,0" VerticalAlignment="Top" Width="340"/>
+        <Button x:Name="Polacz" Content="Połącz" HorizontalAlignment="Left" Margin="10,570,0,0" VerticalAlignment="Top" Width="120" Height="40" Click="Polacz_Click"/>
+        <ComboBox x:Name="Do_polaczenia" HorizontalAlignment="Left" Margin="140,570,00,0" VerticalAlignment="Top" Width="170" Height="40"/>
+        <Button x:Name="Odswiez" HorizontalAlignment="Stretch" Margin="310,570,10,0" VerticalAlignment="Top" Height="40" BorderThickness="0" Click="Odswiez_Click">
+            <TextBlock x:Name="ikona_odswiez" Margin="-6,-15,0,0" Text="↻" FontSize="40"/>
+        </Button>
     </Grid>
 </Page>
