@@ -1,17 +1,93 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainLayout"
-    android:layout_width="384dp"
-    android:layout_height="200dp"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=" com.example.leszek.wykres.MainActivity"
-    android:clickable="false"
-    android:touchscreenBlocksFocus="false"
-    android:focusable="false">
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:background="@color/colorbaza">
+<Button
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:text="Start"
+    android:layout_x="160dp"
+    android:layout_y="175dp"
+    android:background="@color/przycisk"/>
+<Button
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    android:text="Stop"
+    android:layout_x="265dp"
+    android:layout_y="175dp"
+    android:background="@color/przycisk"/>
 
-</RelativeLayout>
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="43dp"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:text="Ciągły odczyt"
+    android:id="@+id/textView"
+    android:layout_x="40dp"
+    android:layout_y="189dp"
+    android:background="@color/colorbaza"/>
 
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    android:text="Wynik pomiaru"
+    android:id="@+id/textView2"
+    android:layout_x="160dp"
+    android:layout_y="255dp"
+    android:background="@color/colorbaza"/>
 
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:text="Nie dokonano pomiaru"
+    android:id="@+id/textView3"
+    android:layout_x="75dp"
+    android:layout_y="303dp"
+    android:background="@color/colorbaza"/>
+
+<Button
+    android:layout_width="167dp"
+    android:layout_height="wrap_content"
+    android:text="Zacznij pomiar"
+    android:id="@+id/button"
+    android:layout_x="121dp"
+    android:layout_y="343dp"
+    android:background="@color/przycisk"/>
+
+<Button
+    android:layout_width="167dp"
+    android:layout_height="wrap_content"
+    android:text="Kalibracja czujnika"
+    android:id="@+id/button2"
+    android:layout_x="121dp"
+    android:layout_y="398dp"
+    android:background="@color/przycisk"/>
+
+<ProgressBar
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="364dp"
+    android:layout_height="40dp"
+    android:id="@+id/progressBar"
+    android:layout_x="8dp"
+    android:layout_y="458dp"
+    android:background="@color/colorbaza"/>
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Połącz"
+    android:id="@+id/button3"
+    android:layout_x="16dp"
+    android:layout_y="505dp"
+    android:background="@color/przycisk"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="149dp"
+        android:layout_x="0dp"
+        android:layout_y="3dp"
+        android:id="@+id/wykres"></RelativeLayout>
+
+</AbsoluteLayout>

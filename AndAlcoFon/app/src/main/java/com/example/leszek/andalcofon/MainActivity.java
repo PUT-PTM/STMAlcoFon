@@ -11,40 +11,36 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RelativeLayout mainLayout;
     private LineChart mChart;
+    private RelativeLayout mLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
-        // create line chart
-        mChart = new LineChart(this);
-        // add to layout
-        mainLayout.addView(mChart);
-
-        // customize line chart
+        mLayout=(RelativeLayout) findViewById(R.id.wykres);
+        //crate line chart
+        mChart=new LineChart(this);
+        //add to layout
+        mLayout.addView(mChart);
+        //customize line chart
         mChart.setDescription("");
-        mChart.setNoDataTextDescription("No data for the moment");
-
-        // enable value
+        mChart.setNoDataTextDescription("brak danych do wyswietlenia");
+        //enable values
         mChart.setHighlightEnabled(true);
-
-        // enable touch gestures
+        //enable touch gestures
         mChart.setTouchEnabled(true);
-
         mChart.setDragEnabled(true);
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
 
-        //enable pinch zoom t oavoid scaling x and y axis separately
+        //enable pinch zoom to avoid scaling x and y axis separately
         mChart.setPinchZoom(true);
 
         // alternative background color
@@ -101,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
-
     private void addEntry()
     {
         LineData data = mChart.getData();
@@ -123,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
     //method to create set
     private LineDataSet createSet()
     {
@@ -143,8 +139,6 @@ public class MainActivity extends AppCompatActivity {
 
         return set;
     }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
