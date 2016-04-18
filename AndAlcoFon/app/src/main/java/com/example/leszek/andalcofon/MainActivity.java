@@ -5,14 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
@@ -20,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
 
     private LineChart mChart;
     private RelativeLayout mLayout;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    Button pstart,stop,pomiar,kalibracja,polacz;
+    boolean isstop=false;
+    public void createChart()
+    {
         mLayout=(RelativeLayout) findViewById(R.id.wykres);
         //crate line chart
         mChart=new LineChart(this);
@@ -72,8 +74,89 @@ public class MainActivity extends AppCompatActivity {
         YAxis y12 = mChart.getAxisRight();
         y12.setEnabled(false);
     }
-
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        createChart();
+        // przyciski związane z activity_main
+        pstart=(Button) findViewById(R.id.pstart);
+        stop=(Button) findViewById(R.id.stop);
+        pomiar=(Button) findViewById(R.id.pomiar);
+        kalibracja=(Button) findViewById(R.id.kalibracja);
+        polacz=(Button) findViewById(R.id.polacz);
+
+        View.OnClickListener stopclick= new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isstop=true;
+            }
+        };
+        stop.setOnClickListener(stopclick);
+        View.OnClickListener pstartclick = new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isstop=false;
+                new Thread(new Runnable(){
+                    @Override
+                    public void run() {
+                        for(int i=0;i<100;i++)
+                        {
+                            if(isstop==false){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addEntry();
+                                }
+                            });
+                            try
+                            {
+                                Thread.sleep(1000);
+                            }
+                            catch (InterruptedException e)
+                            {
+
+                            }
+                        }
+                            else{
+                                break;
+                            }
+                        }
+                    }
+                }).start();
+            }
+        };
+        pstart.setOnClickListener(pstartclick);
+
+        View.OnClickListener pomiarclick=new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
+        pomiar.setOnClickListener(pomiarclick);
+        View.OnClickListener kalibracjaclick= new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
+        kalibracja.setOnClickListener(kalibracjaclick);
+        View.OnClickListener polaczclick=new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
+        polacz.setOnClickListener(polaczclick);
+
+    }
+
+
+
+   /* @Override
     protected void onResume() {
         super.onResume();
 
@@ -96,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-    }
+    }*/
     private void addEntry()
     {
         LineData data = mChart.getData();

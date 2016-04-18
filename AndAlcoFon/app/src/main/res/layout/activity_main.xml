@@ -8,14 +8,16 @@ android:background="@color/colorbaza">
     android:text="Start"
     android:layout_x="160dp"
     android:layout_y="175dp"
-    android:background="@color/przycisk"/>
+    android:background="@color/przycisk"
+    android:id="@+id/pstart"/>
 <Button
     android:layout_width="100dp"
     android:layout_height="wrap_content"
     android:text="Stop"
     android:layout_x="265dp"
     android:layout_y="175dp"
-    android:background="@color/przycisk"/>
+    android:background="@color/przycisk"
+    android:id="@+id/stop"/>
 
 <TextView
     android:layout_width="wrap_content"
@@ -25,7 +27,7 @@ android:background="@color/colorbaza">
     android:id="@+id/textView"
     android:layout_x="40dp"
     android:layout_y="189dp"
-    android:background="@color/colorbaza"/>
+    android:background="@color/colorbaza" />
 
 <TextView
     android:layout_width="wrap_content"
@@ -51,16 +53,16 @@ android:background="@color/colorbaza">
     android:layout_width="167dp"
     android:layout_height="wrap_content"
     android:text="Zacznij pomiar"
-    android:id="@+id/button"
     android:layout_x="121dp"
     android:layout_y="343dp"
-    android:background="@color/przycisk"/>
+    android:background="@color/przycisk"
+    android:id="@+id/pomiar"/>
 
 <Button
     android:layout_width="167dp"
     android:layout_height="wrap_content"
     android:text="Kalibracja czujnika"
-    android:id="@+id/button2"
+    android:id="@+id/kalibracja"
     android:layout_x="121dp"
     android:layout_y="398dp"
     android:background="@color/przycisk"/>
@@ -78,7 +80,7 @@ android:background="@color/colorbaza">
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Połącz"
-    android:id="@+id/button3"
+    android:id="@+id/polacz"
     android:layout_x="16dp"
     android:layout_y="505dp"
     android:background="@color/przycisk"/>
