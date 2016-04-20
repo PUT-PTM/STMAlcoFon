@@ -1,13 +1,17 @@
 package com.example.leszek.andalcofon;
 
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -18,12 +22,25 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import static java.lang.Thread.sleep;
+
 public class MainActivity extends AppCompatActivity {
 
     private LineChart mChart;
     private RelativeLayout mLayout;
     Button pstart,stop,pomiar,kalibracja,polacz;
+    Spinner listaBT;
     boolean isstop=false;
+    protected boolean mActive;
+    protected static final int TIMER_RUNTIME=5000;
+    protected ProgressBar mProgress;
+    protected TextView wynikPomiaru, brakPomiaru;
+    /*Handler h;
+    final int RECIEVE_MESSAGE = 1;        // Status  for Handler
+    private BluetoothAdapter btAdapter = null;
+    private BluetoothSocket btSocket = null;
+    private StringBuilder sb = new StringBuilder();
+    private ConnectedThread mConnectedThread;*/
     public void createChart()
     {
         mLayout=(RelativeLayout) findViewById(R.id.wykres);
@@ -74,17 +91,92 @@ public class MainActivity extends AppCompatActivity {
         YAxis y12 = mChart.getAxisRight();
         y12.setEnabled(false);
     }
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        createChart();
+    public void initializeElements()
+    {
+        mProgress =(ProgressBar) findViewById(R.id.postep);
         // przyciski związane z activity_main
         pstart=(Button) findViewById(R.id.pstart);
         stop=(Button) findViewById(R.id.stop);
         pomiar=(Button) findViewById(R.id.pomiar);
         kalibracja=(Button) findViewById(R.id.kalibracja);
         polacz=(Button) findViewById(R.id.polacz);
+        wynikPomiaru=(TextView) findViewById(R.id.wynikPomiaru);
+        brakPomiaru=(TextView) findViewById(R.id.brakPomiaru);
+
+
+    }
+
+        class postep extends AsyncTask<Void,Void,Void> {
+            @Override
+            protected void onPreExecute() {
+                wynikPomiaru.setText("");
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                mActive = true;
+                try {
+                    int waited = 0;
+                    while (mActive && (waited <= TIMER_RUNTIME)) {
+                        Thread.sleep(250);
+                        if (mActive) {
+                            waited += 250;
+                            updateProgress(waited);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+
+            }
+        }
+    class oczekiwanie extends AsyncTask<Void,Void,Void> {
+        @Override
+        protected void onPreExecute() {
+            brakPomiaru.setText("               Pomiar za 1 sekundę");
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mActive = true;
+            try {
+                int waited = 0;
+                while (mActive && (waited <= 1000)) {
+                    Thread.sleep(1000);
+                        waited += 1000;
+                }
+               // Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            brakPomiaru.setText("Dmuchaj aż pasek postępu dojdzie do końca");
+            wynikPomiaru.setText(" ‰");
+        }
+    }
+    public void updateProgress(final int timePassed)
+    {
+        if(null!=mProgress)
+        {
+            final int progress=mProgress.getMax()*timePassed/TIMER_RUNTIME;
+            mProgress.setProgress(progress);
+        }
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        createChart();
+        initializeElements();
 
         View.OnClickListener stopclick= new View.OnClickListener() {
             @Override
@@ -113,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                             try
                             {
-                                Thread.sleep(1000);
+                                sleep(1000);
                             }
                             catch (InterruptedException e)
                             {
@@ -133,53 +225,27 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener pomiarclick=new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new oczekiwanie().execute();
+                new postep().execute();
             }
         };
         pomiar.setOnClickListener(pomiarclick);
         View.OnClickListener kalibracjaclick= new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new postep().execute();
+                brakPomiaru.setText("Kalibracja czujnika");
             }
         };
         kalibracja.setOnClickListener(kalibracjaclick);
         View.OnClickListener polaczclick=new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
             }
         };
         polacz.setOnClickListener(polaczclick);
-
     }
 
-
-
-   /* @Override
-    protected void onResume() {
-        super.onResume();
-
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-                for(int i=0;i<100;i++)
-                {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addEntry();
-                        }
-                    });
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-
-                    }
-                }
-            }
-        }).start();
-    }*/
     private void addEntry()
     {
         LineData data = mChart.getData();
@@ -198,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
             mChart.notifyDataSetChanged();
             mChart.setVisibleXRange(6);
             mChart.moveViewToX(data.getXValCount()-7);
-
         }
     }
 
@@ -218,8 +283,6 @@ public class MainActivity extends AppCompatActivity {
         set.setHighLightColor(Color.rgb(244, 117, 177));
         set.setValueTextColor(Color.WHITE);
         set.setValueTextSize(10f);
-
-
         return set;
     }
     @Override

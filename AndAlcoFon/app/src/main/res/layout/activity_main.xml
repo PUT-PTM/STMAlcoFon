@@ -34,19 +34,19 @@ android:background="@color/colorbaza">
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:text="Wynik pomiaru"
-    android:id="@+id/textView2"
-    android:layout_x="160dp"
+    android:id="@+id/TextViev1"
+    android:layout_x="152dp"
     android:layout_y="255dp"
     android:background="@color/colorbaza"/>
 
 <TextView
-    android:layout_width="wrap_content"
+    android:layout_width="368dp"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceLarge"
-    android:text="Nie dokonano pomiaru"
-    android:id="@+id/textView3"
-    android:layout_x="75dp"
-    android:layout_y="303dp"
+    android:text="               Nie dokonano pomiaru"
+    android:id="@+id/brakPomiaru"
+    android:layout_x="5dp"
+    android:layout_y="285dp"
     android:background="@color/colorbaza"/>
 
 <Button
@@ -71,10 +71,11 @@ android:background="@color/colorbaza">
     style="?android:attr/progressBarStyleHorizontal"
     android:layout_width="364dp"
     android:layout_height="40dp"
-    android:id="@+id/progressBar"
+    android:id="@+id/postep"
     android:layout_x="8dp"
     android:layout_y="458dp"
-    android:background="@color/colorbaza"/>
+    android:background="@color/colorbaza"
+    android:indeterminate="false" />
 
 <Button
     android:layout_width="wrap_content"
@@ -91,5 +92,15 @@ android:background="@color/colorbaza">
         android:layout_x="0dp"
         android:layout_y="3dp"
         android:id="@+id/wykres"></RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text=""
+        android:id="@+id/wynikPomiaru"
+        android:layout_x="255dp"
+        android:layout_y="255dp" />
+
 
 </AbsoluteLayout>
