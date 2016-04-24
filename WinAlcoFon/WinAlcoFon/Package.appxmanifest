@@ -15,10 +15,13 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="WinAlcoFon.App">
-      <uap:VisualElements DisplayName="WinAlcoFon" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="WinAlcoFon" BackgroundColor="transparent">
+      <uap:VisualElements DisplayName="WinAlcoFon" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="WinAlcoFon is UWP (Uniwersal Windows Platform) bluetooth breathalyzer. More information on: www.github.com/PUT-PTM/STMAlcoFon" BackgroundColor="#ff8c00">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="wide310x150Logo" />
+          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#ff8c00" />
       </uap:VisualElements>
     </Application>
   </Applications>
