@@ -28,8 +28,8 @@
         <TextBlock x:Name="CiaglyOdczyt" HorizontalAlignment="Left" Margin="10,249,0,0" Text="Ciągły odczyt" VerticalAlignment="Top" FontSize="22"/>
         <Button x:Name="Start" Content="Start" HorizontalAlignment="Right" Margin="0,240,95,0" VerticalAlignment="Top" Click="Start_Click" Width="75" Height="50" FontSize="20"/>
         <Button x:Name="Stop" Content="Stop" HorizontalAlignment="Right" Margin="0,240,10,0" VerticalAlignment="Top" Click="Stop_Click" Width="75" Height="50" FontSize="20"/>
-        <TextBlock x:Name="Wynik_pomocniczy" HorizontalAlignment="Left" Margin="10,295,0,0" Width="340" Height="70" TextWrapping="WrapWholeWords" Text="Aby rozpocząć pomiary połącz się z urządzeniem zgodnym z" VerticalAlignment="Top" FontSize="22"/>
-        <TextBlock x:Name="Wynik" HorizontalAlignment="Left" Margin="10,355,0,0" TextWrapping="Wrap" Text=" AlcoFon®" VerticalAlignment="Top" FontSize="50" Width="240"/>
+        <TextBlock x:Name="tekst_pomocniczy" HorizontalAlignment="Left" Margin="10,295,0,0" Width="340" Height="70" TextWrapping="WrapWholeWords" Text="Aby rozpocząć pomiary połącz się z urządzeniem zgodnym z" VerticalAlignment="Top" FontSize="22"/>
+        <TextBlock x:Name="Wynik" HorizontalAlignment="Left" Margin="10,355,0,0" TextWrapping="Wrap" Text="AlcoFon®" VerticalAlignment="Top" FontSize="50" Width="240"/>
         <Button x:Name="Pomiar" Content="Zacznij pomiar" HorizontalAlignment="Left" Margin="10,440,0,0" VerticalAlignment="Top" Width="240" Height="50" Click="Pomiar_Click" FontSize="20"/>
         <Button x:Name="Kalibruj" Content="Kalibracja czujnika" HorizontalAlignment="Left" Margin="10,500,0,0" VerticalAlignment="Top" Width="240" Height="50" Click="Kalibruj_Click" FontSize="20"/>
         <ProgressBar x:Name="Progres" HorizontalAlignment="Right" Height="76" Margin="0,425,-15,0" VerticalAlignment="Top" Width="175" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto">
@@ -37,7 +37,7 @@
                 <CompositeTransform Rotation="-90"/>
             </ProgressBar.RenderTransform>
         </ProgressBar>
-        <Image x:Name="image" HorizontalAlignment="Right" Height="185" Margin="0,366,10,0" VerticalAlignment="Top" Width="110" Source="Assets/progresimg.png"/>
+        <Image x:Name="image" HorizontalAlignment="Right" Height="185" Margin="0,366,10,0" VerticalAlignment="Top" Width="110" Source="Assets/progresimg.png" Tapped="image_Tapped"/>
         <Button x:Name="Polacz" Content="Połącz" HorizontalAlignment="Left" Margin="10,560,0,0" VerticalAlignment="Top" Width="120" Height="50" Click="Polacz_Click" FontSize="20"/>
         <ComboBox x:Name="Do_polaczenia" HorizontalAlignment="Left" Margin="140,560,00,0" VerticalAlignment="Top" Width="165" Height="50"/>
         <Button x:Name="Odswiez" HorizontalAlignment="Stretch" Margin="305,560,10,0" VerticalAlignment="Top" Height="50" BorderThickness="0" Click="Odswiez_Click">
