@@ -30,3 +30,7 @@
 
 # Debug files
 *.dSYM/
+
+# Folders
+/WinAlcoFon/WinAlcoFon/bin
+/WinAlcoFon/WinAlcoFon/obj
