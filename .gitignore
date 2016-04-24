@@ -31,6 +31,11 @@
 # Debug files
 *.dSYM/
 
+# Other files
+*.suo
+
 # Folders
 /WinAlcoFon/WinAlcoFon/bin
 /WinAlcoFon/WinAlcoFon/obj
+/WinAlcoFon/.vs
+/WinAlcoFon/obj
