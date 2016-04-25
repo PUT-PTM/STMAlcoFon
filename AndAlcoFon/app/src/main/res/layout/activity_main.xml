@@ -102,5 +102,14 @@ android:background="@color/colorbaza">
         android:layout_x="255dp"
         android:layout_y="255dp" />
 
+    <TextView
+        android:layout_width="76dp"
+        android:layout_height="29dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/test"
+        android:layout_x="186dp"
+        android:layout_y="488dp" />
+
 
 </AbsoluteLayout>

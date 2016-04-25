@@ -1,7 +1,12 @@
 package com.example.leszek.andalcofon;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -10,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -22,30 +26,40 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.util.UUID;
+
 import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity {
 
     private LineChart mChart;
     private RelativeLayout mLayout;
-    Button pstart,stop,pomiar,kalibracja,polacz;
-    Spinner listaBT;
-    boolean isstop=false;
+    Button pstart, stop, pomiar, kalibracja, polacz;
+    boolean isstop = false;
     protected boolean mActive;
-    protected static final int TIMER_RUNTIME=5000;
+    protected static final int TIMER_RUNTIME = 5000;
     protected ProgressBar mProgress;
-    protected TextView wynikPomiaru, brakPomiaru;
-    /*Handler h;
-    final int RECIEVE_MESSAGE = 1;        // Status  for Handler
+    protected TextView wynikPomiaru, brakPomiaru, test;
     private BluetoothAdapter btAdapter = null;
     private BluetoothSocket btSocket = null;
     private StringBuilder sb = new StringBuilder();
-    private ConnectedThread mConnectedThread;*/
-    public void createChart()
-    {
-        mLayout=(RelativeLayout) findViewById(R.id.wykres);
+    private ConnectedThread mConnectedThread;
+    public int PomiarADC;
+
+    // SPP UUID service
+    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    // MAC-address of Bluetooth module (you must edit this line)
+    private static String address = "20:16:01:06:92:27";
+
+    // tworzenie wykresu
+    public void createChart() {
+        mLayout = (RelativeLayout) findViewById(R.id.wykres);
         //crate line chart
-        mChart=new LineChart(this);
+        mChart = new LineChart(this);
         //add to layout
         mLayout.addView(mChart);
         //customize line chart
@@ -63,17 +77,17 @@ public class MainActivity extends AppCompatActivity {
         mChart.setPinchZoom(true);
 
         // alternative background color
-        mChart.setBackgroundColor(Color.rgb(255,140,0));
+        mChart.setBackgroundColor(Color.rgb(255, 140, 0));
 
         //now we work with data
-        LineData data= new LineData();
+        LineData data = new LineData();
         data.setValueTextColor(Color.WHITE);
 
         // add data to line chart
         mChart.setData(data);
 
         //get legend object
-        Legend l= mChart.getLegend();
+        Legend l = mChart.getLegend();
         //Customize legend
         l.setForm(Legend.LegendForm.LINE);
         l.setTextColor(Color.WHITE);
@@ -85,57 +99,62 @@ public class MainActivity extends AppCompatActivity {
 
         YAxis y1 = mChart.getAxisLeft();
         y1.setTextColor(Color.WHITE);
-        y1.setAxisMaxValue(140f);
+        y1.setAxisMaxValue(4096);
         y1.setDrawGridLines(true);
 
         YAxis y12 = mChart.getAxisRight();
         y12.setEnabled(false);
     }
-    public void initializeElements()
-    {
-        mProgress =(ProgressBar) findViewById(R.id.postep);
+
+    // inicjalizowanie przycisków
+    public void initializeElements() {
+        mProgress = (ProgressBar) findViewById(R.id.postep);
         // przyciski związane z activity_main
-        pstart=(Button) findViewById(R.id.pstart);
-        stop=(Button) findViewById(R.id.stop);
-        pomiar=(Button) findViewById(R.id.pomiar);
-        kalibracja=(Button) findViewById(R.id.kalibracja);
-        polacz=(Button) findViewById(R.id.polacz);
-        wynikPomiaru=(TextView) findViewById(R.id.wynikPomiaru);
-        brakPomiaru=(TextView) findViewById(R.id.brakPomiaru);
+        pstart = (Button) findViewById(R.id.pstart);
+        stop = (Button) findViewById(R.id.stop);
+        pomiar = (Button) findViewById(R.id.pomiar);
+        kalibracja = (Button) findViewById(R.id.kalibracja);
+        polacz = (Button) findViewById(R.id.polacz);
+        wynikPomiaru = (TextView) findViewById(R.id.wynikPomiaru);
+        brakPomiaru = (TextView) findViewById(R.id.brakPomiaru);
+        test=(TextView) findViewById((R.id.test));
+
 
 
     }
 
-        class postep extends AsyncTask<Void,Void,Void> {
-            @Override
-            protected void onPreExecute() {
-                wynikPomiaru.setText("");
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                mActive = true;
-                try {
-                    int waited = 0;
-                    while (mActive && (waited <= TIMER_RUNTIME)) {
-                        Thread.sleep(250);
-                        if (mActive) {
-                            waited += 250;
-                            updateProgress(waited);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-
-            }
+    // klasa do uzupełniania progressbaru
+    class postep extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            wynikPomiaru.setText("");
         }
-    class oczekiwanie extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mActive = true;
+            try {
+                int waited = 0;
+                while (mActive && (waited <= TIMER_RUNTIME)) {
+                    Thread.sleep(250);
+                    if (mActive) {
+                        waited += 250;
+                        updateProgress(waited);
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+        }
+    }
+
+    // klasa do wypisywania teksu odiczania
+    class oczekiwanie extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             brakPomiaru.setText("               Pomiar za 1 sekundę");
@@ -148,9 +167,9 @@ public class MainActivity extends AppCompatActivity {
                 int waited = 0;
                 while (mActive && (waited <= 1000)) {
                     Thread.sleep(1000);
-                        waited += 1000;
+                    waited += 1000;
                 }
-               // Thread.sleep(1000);
+                // Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -163,56 +182,56 @@ public class MainActivity extends AppCompatActivity {
             wynikPomiaru.setText(" ‰");
         }
     }
-    public void updateProgress(final int timePassed)
-    {
-        if(null!=mProgress)
-        {
-            final int progress=mProgress.getMax()*timePassed/TIMER_RUNTIME;
+
+    // metoda do wypełniania progressbaru
+    public void updateProgress(final int timePassed) {
+        if (null != mProgress) {
+            final int progress = mProgress.getMax() * timePassed / TIMER_RUNTIME;
             mProgress.setProgress(progress);
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         createChart();
         initializeElements();
 
-        View.OnClickListener stopclick= new View.OnClickListener() {
+        btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
+        checkBTState();
+        // Listener przycisku stop
+        View.OnClickListener stopclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isstop=true;
+                isstop = true;
             }
         };
         stop.setOnClickListener(stopclick);
-        View.OnClickListener pstartclick = new View.OnClickListener()
-        {
+        // Listener przycisku start
+        View.OnClickListener pstartclick = new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-                isstop=false;
-                new Thread(new Runnable(){
+            public void onClick(View v) {
+                isstop = false;
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        for(int i=0;i<100;i++)
-                        {
-                            if(isstop==false){
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    addEntry();
-                                }
-                            });
-                            try
-                            {
-                                sleep(1000);
-                            }
-                            catch (InterruptedException e)
-                            {
+                        for (int i = 0; i < 100; i++) {
+                            if (isstop == false) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mConnectedThread.start();
+                                        addEntry();
+                                    }
+                                });
+                                try {
+                                    sleep(1000);
+                                } catch (InterruptedException e) {
 
-                            }
-                        }
-                            else{
+                                }
+                            } else {
                                 break;
                             }
                         }
@@ -221,8 +240,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         pstart.setOnClickListener(pstartclick);
-
-        View.OnClickListener pomiarclick=new View.OnClickListener() {
+        // listener przycisku pomiar
+        View.OnClickListener pomiarclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new oczekiwanie().execute();
@@ -230,7 +249,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         pomiar.setOnClickListener(pomiarclick);
-        View.OnClickListener kalibracjaclick= new View.OnClickListener() {
+        // listener przycisku kalibracja
+        View.OnClickListener kalibracjaclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new postep().execute();
@@ -238,39 +258,108 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         kalibracja.setOnClickListener(kalibracjaclick);
-        View.OnClickListener polaczclick=new View.OnClickListener() {
+        // listener przycisku polacz
+        View.OnClickListener polaczclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Set up a pointer to the remote node using it's address.
+                BluetoothDevice device = btAdapter.getRemoteDevice(address);
+                try {
+                    btSocket = createBluetoothSocket(device);
+                } catch (IOException e) {
+                }
+
+
+                // Discovery is resource intensive.  Make sure it isn't going on
+                // when you attempt to connect and pass your message.
+                btAdapter.cancelDiscovery();
+
+
+                try {
+                    btSocket.connect();
+                } catch (IOException e) {
+                    try {
+                        btSocket.close();
+                    } catch (IOException e2) {
+                    }
+                }
+                mConnectedThread = new ConnectedThread(btSocket);
+
             }
         };
         polacz.setOnClickListener(polaczclick);
     }
 
-    private void addEntry()
+    public BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
+        if (Build.VERSION.SDK_INT >= 10) {
+            try {
+                final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", new Class[] {UUID.class});
+                return (BluetoothSocket) m.invoke(device, MY_UUID);
+            } catch (Exception e) {
+
+            }
+        }
+        return device.createRfcommSocketToServiceRecord(MY_UUID);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    public void onPause()
     {
-        LineData data = mChart.getData();
-        if (data!=null)
-        {
-            LineDataSet set=data.getDataSetByIndex(0);
-            if(set==null)
+        super.onPause();
+
+        try     {
+            btSocket.close();
+        } catch (IOException e2) {
+
+        }
+    }
+    private void checkBTState() {
+        // Check for Bluetooth support and then check to make sure it is turned on
+        // Emulator doesn't support Bluetooth and will return null
+        if(btAdapter==null) {
+        }
+        else {
+            if (btAdapter.isEnabled())
             {
-                set= createSet();
+
+            } else {
+                //Prompt user to turn on Bluetooth
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, 1);
+            }
+        }
+    }
+
+
+
+    // wysyłanie danych do wykresu
+    private void addEntry() {
+        LineData data = mChart.getData();
+        if (data != null) {
+            LineDataSet set = data.getDataSetByIndex(0);
+            if (set == null) {
+                set = createSet();
                 data.addDataSet(set);
             }
             // add a new random value
             data.addXValue("");
-            data.addEntry(new Entry((float) (Math.random() * 75) + 60f, set.getEntryCount()), 0);
+            data.addEntry(new Entry((int) PomiarADC, set.getEntryCount()), 0);
 
             mChart.notifyDataSetChanged();
             mChart.setVisibleXRange(6);
-            mChart.moveViewToX(data.getXValCount()-7);
+            mChart.moveViewToX(data.getXValCount() - 7);
         }
     }
 
     //method to create set
-    private LineDataSet createSet()
-    {
-        LineDataSet set = new LineDataSet(null,"Aktualna wartosc");
+    private LineDataSet createSet() {
+        LineDataSet set = new LineDataSet(null, "Aktualna wartosc");
         set.setDrawCubic(true);
         set.setCubicIntensity(0.2f);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
@@ -285,6 +374,7 @@ public class MainActivity extends AppCompatActivity {
         set.setValueTextSize(10f);
         return set;
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -306,4 +396,56 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+public class ConnectedThread extends Thread {
+    private final InputStream mmInStream;
+    private final OutputStream mmOutStream;
+
+    public ConnectedThread(BluetoothSocket socket) {
+        InputStream tmpIn = null;
+        OutputStream tmpOut = null;
+
+        // Get the input and output streams, using temp objects because
+        // member streams are final
+        try {
+            tmpIn = socket.getInputStream();
+            tmpOut = socket.getOutputStream();
+        } catch (IOException e) { }
+
+        mmInStream = tmpIn;
+        mmOutStream = tmpOut;
+    }
+
+    public void run() {
+        byte[] buffer = new byte[4];  // buffer store for the stream
+        int b1 = 0,b2=0,b3=0,b4=0; // bytes returned from read()
+
+        // Keep listening to the InputStream until an exception occurs
+            try {
+                // Read from the InputStream
+               b1 = mmInStream.read(buffer);                 // Get number of bytes and message in "buffer";
+                test.setText(b1);
+                b2=mmInStream.read(buffer);
+                test.setText(b2);
+                b3=mmInStream.read(buffer);
+                test.setText(b3);
+                b4=mmInStream.read(buffer);
+                test.setText(b4);
+            } catch (IOException e) {
+
+            }
+        PomiarADC=(((char)b1 -'0')*1000+((char)b2-'0')*100+((char)b3-'0')*10+(char)b4-'0');
+
+
+    }
+
+    /* Call this from the main activity to send data to the remote device */
+    public void write(String wiadomosc) {
+        byte[] msgBuffer = wiadomosc.getBytes();
+        try {
+            mmOutStream.write(msgBuffer); // wysyłanie danych
+        } catch (IOException e) {
+        }
+    }
 }
+}
+
