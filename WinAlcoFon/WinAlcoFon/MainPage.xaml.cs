@@ -33,7 +33,8 @@ namespace WinAlcoFon
         }
         double temp = 0;//do wartosci wyswietlanych pod osia OX
         bool uruchomione;
-        double wynik_w_promilach=0;
+        bool polaczono;
+        double wynik_w_promilach =0;
         double usredniony_wynik = 0;
         double prog_0_promili = 150;//zmieniany podczas kalibracji
         double przelicznik = 0.0021287379624937;//zmieniany podczas kalibracji, poczatkowo obliczony dla progu=150, wyliczany z wzoru 8.4/(4096-prog_0_promili)
@@ -46,6 +47,7 @@ namespace WinAlcoFon
         StreamSocket _socket;
         DataWriter WriterData;
         DataReader ReaderData;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -57,9 +59,8 @@ namespace WinAlcoFon
                 ShowGridLines = true
             };
             zaladuj_wykres();
-            uruchomione = false;
             blokuj_przyciski(true);
-            Stop.IsEnabled = false;
+            image.IsTapEnabled = true;
             szukaj_bt();
         }
         void wypisz(string gora, string dol= "AlcoFon®")
@@ -137,6 +138,7 @@ namespace WinAlcoFon
                 Pomiar.IsEnabled = false;
                 Kalibruj.IsEnabled = false;
                 uruchomione = true;
+                image.IsTapEnabled = false;
             }
             else
             {
@@ -145,6 +147,7 @@ namespace WinAlcoFon
                 Pomiar.IsEnabled = true;
                 Kalibruj.IsEnabled = true;
                 uruchomione = false;
+                image.IsTapEnabled = true;
             }
         }
         void zaladuj_wykres()
@@ -265,6 +268,7 @@ namespace WinAlcoFon
                 wypisz("Połączenie zostało nawiązane,\nteraz można rozpocząć pomiary z");
                 WriterData = new DataWriter(_socket.OutputStream);
                 ReaderData = new DataReader(_socket.InputStream);
+                polaczono = true;
             }
             catch (Exception)
             {
@@ -282,13 +286,34 @@ namespace WinAlcoFon
         private async void image_Tapped(object sender, TappedRoutedEventArgs e)
         {
             try
-            { 
+            {
+                String czy_poczekac = "";
+                if (polaczono)
+                {
+                    wyslij_przez_bt("1");
+                    await Task.Delay(250);
+                    int aktualny_odczyt = await pojedynczy_odczyt();
+                    czy_poczekac = "\nAktualny odczyt to: " + aktualny_odczyt + "\n";
+                    if (aktualny_odczyt <= 150)
+                    {
+                        czy_poczekac += "Wszystko jest OK, pomiary będą całkiem dokładne.";
+                    }
+                    else if (aktualny_odczyt > 150 && aktualny_odczyt < 225)
+                    {
+                        czy_poczekac += "Nie jest tak źle, ale lepiej zaczekać jeszcze chwilę by uzyskać dokładniejsze pomiary.";
+                    }
+                    else
+                    {
+                        czy_poczekac += "Pomiary będą bardzo nie dokładne, stanowczo trzeba zaczekać.";
+                    }
+                }
                 var dialog = new Windows.UI.Popups.MessageDialog(
                     "Między pomiarami powinna nastąpić przerwa by czujnik mógł się znów \"przyzwyczaić\" do świeżego powietrza. Należy pamiętać, że jest to prosty czujnik i dokładność pomiarów może nie odzwierciedlać rzeczywistości. Wynik zależy nawet od wilgotności i temperatury w jakiej sprzęt jest używany. NIGDY NIE PROWADŹ SAMOCHODU PO SPOŻYCIU ALKOHOLU\n"+
                     "Dane do debugowania:"+"\n"+
                     "próg: " + prog_0_promili + '\n' +
                     "przelicznik: " + przelicznik + '\n'+
-                    "nieprzeliczony ostatni pomiar: "+usredniony_wynik,
+                    "nieprzeliczony ostatni pomiar: "+usredniony_wynik+
+                    czy_poczekac,
                     "Informacje ogólne i uwagi");//tytuł po przecinku
                 dialog.Commands.Add(new Windows.UI.Popups.UICommand("OK") { Id = 0 });
 
@@ -298,7 +323,7 @@ namespace WinAlcoFon
                 }
                 var result = await dialog.ShowAsync();
             }
-            catch(Exception){}
-        }
+            catch (Exception){}
+        }   
     }
 }
