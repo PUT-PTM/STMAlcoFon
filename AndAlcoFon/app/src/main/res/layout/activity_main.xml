@@ -34,19 +34,19 @@ android:background="@color/colorbaza">
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:text="Wynik pomiaru"
-    android:id="@+id/TextViev1"
-    android:layout_x="152dp"
+    android:id="@+id/textView2"
+    android:layout_x="160dp"
     android:layout_y="255dp"
     android:background="@color/colorbaza"/>
 
 <TextView
-    android:layout_width="368dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceLarge"
-    android:text="               Nie dokonano pomiaru"
+    android:text="                     Nie dokonano pomiaru"
     android:id="@+id/brakPomiaru"
-    android:layout_x="5dp"
-    android:layout_y="285dp"
+    android:layout_x="0dp"
+    android:layout_y="302dp"
     android:background="@color/colorbaza"/>
 
 <Button
@@ -74,8 +74,7 @@ android:background="@color/colorbaza">
     android:id="@+id/postep"
     android:layout_x="8dp"
     android:layout_y="458dp"
-    android:background="@color/colorbaza"
-    android:indeterminate="false" />
+    android:background="@color/colorbaza"/>
 
 <Button
     android:layout_width="wrap_content"
@@ -101,15 +100,6 @@ android:background="@color/colorbaza">
         android:id="@+id/wynikPomiaru"
         android:layout_x="255dp"
         android:layout_y="255dp" />
-
-    <TextView
-        android:layout_width="76dp"
-        android:layout_height="29dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
-        android:id="@+id/test"
-        android:layout_x="186dp"
-        android:layout_y="488dp" />
 
 
 </AbsoluteLayout>
