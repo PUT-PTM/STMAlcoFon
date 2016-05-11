@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -38,20 +39,24 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout mLayout;
     Button pstart, stop, pomiar, kalibracja, polacz;
     boolean isstop = false;
-    protected boolean mActive;
+    protected boolean mActive, czyOdebrano;
     protected static final int TIMER_RUNTIME = 5000;
     protected ProgressBar mProgress;
     protected TextView wynikPomiaru, brakPomiaru, test;
     private BluetoothAdapter btAdapter = null;
     private BluetoothSocket btSocket = null;
+    final int RECIEVE_MESSAGE = 1;
     private StringBuilder sb = new StringBuilder();
     private ConnectedThread mConnectedThread;
     public int PomiarADC;
+    public Handler mHandler;
+
 
     // SPP UUID service
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     // MAC-address of Bluetooth module (you must edit this line)
-    private static String address = "20:16:01:06:92:27";
+    private static String address = "20:16:01:06:92:27"; // mac HC-05
+    //private static String address="60-57-18-82-27-69";  // mac komputera
 
 
     public void createChart() {
@@ -98,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         YAxis y1 = mChart.getAxisLeft();
         y1.setTextColor(Color.WHITE);
-        y1.setAxisMaxValue(150);
+        y1.setAxisMaxValue(4000);
         y1.setDrawGridLines(true);
 
         YAxis y12 = mChart.getAxisRight();
@@ -119,34 +124,32 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    class OdczytCiagly extends AsyncTask<Void, Void, Void> {
+ /*   class OdczytCiagly extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
-
-            // mConnectedThread.start();
-
         }
-
         @Override
         protected Void doInBackground(Void... params) {
+
+
             while (isstop != true) {
                 addEntry();
+                czyOdebrano=false;
                 try {
                     Thread.sleep(250);
-                } catch (InterruptedException e) {
 
+
+                } catch (InterruptedException e) {
                 }
             }
             return null;
         }
-
         @Override
         protected void onPostExecute(Void result) {
-
         }
 
-    }
+    }*/
 
     // klasa do uzupełniania progressbaru
     class postep extends AsyncTask<Void, Void, Void> {
@@ -199,11 +202,42 @@ public class MainActivity extends AppCompatActivity {
 
         btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
         checkBTState();
+        mHandler = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                switch (msg.what) {
+                    case RECIEVE_MESSAGE:                                                   // if receive massage
+                        byte[] readBuf = (byte[]) msg.obj;
+                        String strIncom = new String(readBuf, 0, msg.arg1);                 // create string from bytes array
+                        sb.append(strIncom);                                                // append string
+                        if (sb.length()==4) {                                            // if end-of-line,
+                            String sbprint = sb.substring(0, 4);               // extract string
+                            sb.delete(0, sb.length());
+                            PomiarADC=0;
+                            czyOdebrano=true;
+                                if(sbprint.toCharArray()[0]>=48)
+                                    PomiarADC+=(sbprint.toCharArray()[0]-'0')*1000;
+                                if(sbprint.toCharArray()[1]>=48)
+                                    PomiarADC+=(sbprint.toCharArray()[1]-'0')*100;
+                                if(sbprint.toCharArray()[2]>=48)
+                                    PomiarADC+=(sbprint.toCharArray()[2]-'0')*10;
+                                if(sbprint.toCharArray()[3]>=48)
+                                    PomiarADC+=(sbprint.toCharArray()[3]-'0');
+                                addEntry();
+                        }
+                        break;
+                }
+            };
+        };
         // Listener przycisku stop
         View.OnClickListener stopclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isstop = true;
+                try {
+                    mConnectedThread.write("S");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         };
         stop.setOnClickListener(stopclick);
@@ -215,10 +249,11 @@ public class MainActivity extends AppCompatActivity {
                 mConnectedThread = new ConnectedThread(btSocket);
                 try {
                     mConnectedThread.write("C");
+                    mConnectedThread.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                new OdczytCiagly().execute();
+                //new OdczytCiagly().execute();
             }
         };
         pstart.setOnClickListener(pstartclick);
@@ -268,9 +303,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", new Class[]{UUID.class});
                 return (BluetoothSocket) m.invoke(device, MY_UUID);
-            } catch (Exception e) {
-
-            }
+            } catch (Exception e) { }
         }
         return device.createRfcommSocketToServiceRecord(MY_UUID);
     }
@@ -282,7 +315,6 @@ public class MainActivity extends AppCompatActivity {
         if (btAdapter == null) {
         } else {
             if (btAdapter.isEnabled()) {
-
             } else {
                 //Prompt user to turn on Bluetooth
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -309,6 +341,8 @@ public class MainActivity extends AppCompatActivity {
             mChart.notifyDataSetChanged();
             mChart.setVisibleXRange(6);
             mChart.moveViewToX(data.getXValCount() - 7);
+            PomiarADC=0;
+            czyOdebrano=true;
         }
     }
 
@@ -364,17 +398,26 @@ public class MainActivity extends AppCompatActivity {
             int bytes; // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs
-            try {
-                // Read from the InputStream
-                bytes = mmInStream.read(buffer, 0, 4);                 // Get number of bytes and message in "buffer";
 
-            } catch (IOException e) {
-
-            }
-                PomiarADC = ((buffer[0] - '0' )* 1000)+((buffer[1] - '0' )* 100)+((buffer[2] - '0' )* 10)+(buffer[3] - '0' );
+                    while (true){
+                        try {
+                            // Read from the InputStream
+                            bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
+                           // czyOdebrano=true;
+                                 mHandler.obtainMessage(RECIEVE_MESSAGE, 4, -1, buffer).sendToTarget();     // Send to message queue Handler
+                                if (czyOdebrano)
+                                {
+                                    sleep(500);
+                                    czyOdebrano=false;
+                                }
+                        } catch (IOException e) {
+                            ;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
         }
-
         /* Call this from the main activity to send data to the remote device */
         public void write(String wiadomosc) throws IOException {
             String msg = wiadomosc;
