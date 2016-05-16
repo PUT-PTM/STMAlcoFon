@@ -17,7 +17,7 @@
 </editorArea>
 <editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="D:/STMAlcoFon/StmAlcoFon/main.c" title="main.c" tooltip="D:/STMAlcoFon/StmAlcoFon/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/StmAlcoFon/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5319" selectionTopPixel="0"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2019" selectionTopPixel="664"/>
 </editor>
 </editors>
 <views>
@@ -269,8 +269,29 @@
 <item historyLabel="main.c" index="0">
 <position info="not_deleted" x="4432" y="4"/>
 </item>
-<item active="true" historyLabel="main.c" index="0">
+<item historyLabel="main.c" index="0">
 <position info="not_deleted" x="4407" y="38"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="4020" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="2240" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="1355" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="2221" y="0"/>
+</item>
+<item historyLabel="main.c" index="0">
+<position/>
+</item>
+<item historyLabel="main.c" index="0">
+<position info="not_deleted" x="5124" y="79"/>
+</item>
+<item active="true" historyLabel="main.c" index="0">
+<position info="not_deleted" x="1797" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>

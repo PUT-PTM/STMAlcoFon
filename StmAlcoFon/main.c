@@ -64,34 +64,41 @@ void USART3_IRQHandler(void)
 	if(USART_GetITStatus(USART3,USART_IT_RXNE)!=RESET)
 	{
 		char temp=USART3->DR;//wczytanie do temp odebranego znaku
-		if(temp=='C')//wlaczenie trybu ciaglego
+		TIM_Cmd(TIM5, ENABLE );
+		switch(temp)
 		{
-			czy_wysylac=-1;
-		}
-		if(temp=='P')//pomiar lub kalibracja - wysylanie danych przez 5 sekund
-		{
-			czy_wysylac=20;//20 próbek wysylanych 4/s to daje 5 sekund
-		}
-		if(temp=='T')//do testowania
-		{
-			czy_wysylac=1;//wysylana pojedyncza próbka
-		}
-		if(temp=='S'||temp=='s')//wylaczenie trybu ciaglego
-		{
-			czy_wysylac=0;
-			dziwnie_wysylac=0;
-		}
-		if(temp=='t')//do testowania
-		{
-			dziwnie_wysylac=1;//wysylana pojedyncza próbka
-		}
-		if(temp=='c')//tryb ciagly - wysylanie jako 2 bajty
-		{
-			dziwnie_wysylac=-1;
-		}
-		if(temp=='p')//pomiar lub kalibracja - wysylanie danych przez 5 sekund
-		{
-			dziwnie_wysylac=20;//20 próbek wysylanych 4/s to daje 5 sekund
+			case'C'://wlaczenie trybu ciaglego
+				czy_wysylac=-1;
+				break;
+			case'P'://pomiar lub kalibracja - wysylanie danych przez 5 sekund
+				czy_wysylac=20;//20 próbek wysylanych 4/s to daje 5 sekund
+				break;
+			case'T'://do testowania
+				czy_wysylac=1;//wysylana pojedyncza próbka
+				break;
+			case'S'://wylaczenie trybu ciaglego
+				TIM_Cmd(TIM5, DISABLE);
+				TIM5->CNT=0;
+				dziwnie_wysylac=0;
+				czy_wysylac=0;
+				break;
+			case's':
+				TIM_Cmd(TIM5, DISABLE);
+				TIM5->CNT=0;
+				dziwnie_wysylac=0;
+				czy_wysylac=0;
+				break;
+			case't'://do testowania
+				dziwnie_wysylac=1;//wysylana pojedyncza próbka
+				TIM5->CNT=245;
+				break;
+			case'c'://tryb ciagly - wysylanie jako 2 bajty
+				dziwnie_wysylac=-1;
+				break;
+			case'p'://pomiar lub kalibracja - wysylanie danych przez 5 sekund
+				dziwnie_wysylac=20;//20 próbek wysylanych 4/s
+				break;
+
 		}
 	}
 }
@@ -132,7 +139,7 @@ void timer5()
 	konfiguracja_timer.TIM_ClockDivision=TIM_CKD_DIV1;
 	konfiguracja_timer.TIM_CounterMode=TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM5,&konfiguracja_timer);
-	TIM_Cmd(TIM5, ENABLE );
+	TIM_Cmd(TIM5, DISABLE);
 }
 
 void przerwanie_timer5()
@@ -165,6 +172,11 @@ void TIM5_IRQHandler(void)
 			ADC_Result=ADC_GetConversionValue(ADC1);
 			usart_wyslijliczbe(ADC_Result);
 			czy_wysylac--;
+			if(czy_wysylac==0)
+			{
+				TIM_Cmd(TIM5, DISABLE);
+				TIM5->CNT=0;
+			}
 		}
 		if(dziwnie_wysylac==-1)//tryb ciagly
 		{
@@ -180,6 +192,11 @@ void TIM5_IRQHandler(void)
 			ADC_Result=ADC_GetConversionValue(ADC1);
 			wyslijjako2bajty(ADC_Result);
 			dziwnie_wysylac--;
+			if(dziwnie_wysylac==0)
+			{
+				TIM_Cmd(TIM5, DISABLE);
+				TIM5->CNT=0;
+			}
 		}
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15);
 		if(ADC_Result>150)
@@ -198,7 +215,6 @@ void TIM5_IRQHandler(void)
 		{
 			GPIO_SetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15);
 		}
-
 		// wyzerowanie flagi wyzwolonego przerwania
 		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
 	}
