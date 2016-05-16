@@ -33,11 +33,12 @@ android:background="@color/colorbaza">
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceSmall"
-    android:text="Wynik pomiaru"
+    android:text="                Wynik pomiaru"
     android:id="@+id/textView2"
-    android:layout_x="160dp"
-    android:layout_y="255dp"
-    android:background="@color/colorbaza"/>
+    android:layout_x="84dp"
+    android:layout_y="253dp"
+    android:background="@color/colorbaza"
+    android:singleLine="true" />
 
 <TextView
     android:layout_width="wrap_content"

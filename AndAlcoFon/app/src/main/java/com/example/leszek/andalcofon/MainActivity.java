@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private LineChart mChart;
     private RelativeLayout mLayout;
     Button pstart, stop, pomiar, kalibracja, polacz;
-    boolean isstop = false;
+    boolean isstop = false, kalibracjaBT=false, pomiarBT=false, ciaglyBT=false;
     protected boolean mActive, czyOdebrano;
     protected static final int TIMER_RUNTIME = 5000;
     protected ProgressBar mProgress;
@@ -47,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothSocket btSocket = null;
     final int RECIEVE_MESSAGE = 1;
     private StringBuilder sb = new StringBuilder();
-    private ConnectedThread mConnectedThread;
-    public int PomiarADC;
+    private ConnectedThread mConnectedThread, mConnectedPomiar, mConnectedKalibracja;
+    public int PomiarADC, tajemniczyLicznik=1, poziomZero=120;
+    public float wynikKalibracja=0, wynikPomiar=0;
     public Handler mHandler;
 
 
@@ -124,33 +126,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
- /*   class OdczytCiagly extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-        }
-        @Override
-        protected Void doInBackground(Void... params) {
-
-
-            while (isstop != true) {
-                addEntry();
-                czyOdebrano=false;
-                try {
-                    Thread.sleep(250);
-
-
-                } catch (InterruptedException e) {
-                }
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void result) {
-        }
-
-    }*/
-
     // klasa do uzupełniania progressbaru
     class postep extends AsyncTask<Void, Void, Void> {
         int waited = 0;
@@ -179,7 +154,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void result) {
-            brakPomiaru.setText("koniec odliczania");
+            if(pomiarBT){
+                wynikPomiar/=20;
+                pomiarBT=false;
+                wynikPomiaru.setText(" ");
+                Toast.makeText(getApplicationContext(),"wynik wynosi: "+ wynikPomiar, Toast.LENGTH_SHORT).show();
+
+            }
+            if(kalibracjaBT){
+                poziomZero=(int)(wynikKalibracja/20);
+                kalibracjaBT=false;
+                brakPomiaru.setText("kalibracja zakonczona");
+                Toast.makeText(getApplicationContext(),"poziom zero wynosi: "+ poziomZero, Toast.LENGTH_SHORT).show();
+
+            }
         }
 
     }
@@ -207,23 +195,37 @@ public class MainActivity extends AppCompatActivity {
                 switch (msg.what) {
                     case RECIEVE_MESSAGE:                                                   // if receive massage
                         byte[] readBuf = (byte[]) msg.obj;
-                        String strIncom = new String(readBuf, 0, msg.arg1);                 // create string from bytes array
+                        byte[] kopia=readBuf.clone();
+                        String strIncom = new String(kopia, 0, msg.arg1);                 // create string from bytes array
                         sb.append(strIncom);                                                // append string
-                        if (sb.length()==4) {                                            // if end-of-line,
+                        if (tajemniczyLicznik!=1) {                                            // if end-of-line,
                             String sbprint = sb.substring(0, 4);               // extract string
                             sb.delete(0, sb.length());
                             PomiarADC=0;
-                            czyOdebrano=true;
-                                if(sbprint.toCharArray()[0]>=48)
-                                    PomiarADC+=(sbprint.toCharArray()[0]-'0')*1000;
-                                if(sbprint.toCharArray()[1]>=48)
-                                    PomiarADC+=(sbprint.toCharArray()[1]-'0')*100;
-                                if(sbprint.toCharArray()[2]>=48)
-                                    PomiarADC+=(sbprint.toCharArray()[2]-'0')*10;
-                                if(sbprint.toCharArray()[3]>=48)
-                                    PomiarADC+=(sbprint.toCharArray()[3]-'0');
-                                addEntry();
+                                if(sbprint.toCharArray()[0]!=32&& sbprint.toCharArray()[1]!=32 && sbprint.toCharArray()[2]!=32 && sbprint.toCharArray()[3]!=32)
+                                    PomiarADC=(sbprint.toCharArray()[0]-'0')*1000+
+                                            (sbprint.toCharArray()[1]-'0')*100+
+                                            (sbprint.toCharArray()[2]-'0')*10+
+                                            (sbprint.toCharArray()[3]-'0');
+                               else if(sbprint.toCharArray()[0]==32&& sbprint.toCharArray()[1]!=32&& sbprint.toCharArray()[2]!=32 && sbprint.toCharArray()[3]!=32)
+                                    PomiarADC=(sbprint.toCharArray()[1]-'0')*100+
+                                            (sbprint.toCharArray()[2]-'0')*10+
+                                            (sbprint.toCharArray()[3]-'0');
+                                else if(sbprint.toCharArray()[0]==32&& sbprint.toCharArray()[1]==32 && sbprint.toCharArray()[2]!=32&& sbprint.toCharArray()[3]!=32)
+                                    PomiarADC=(sbprint.toCharArray()[2]-'0')*10+
+                                            (sbprint.toCharArray()[3]-'0');
+                                else if(sbprint.toCharArray()[0]==32&& sbprint.toCharArray()[1]==32 && sbprint.toCharArray()[2]==32 && sbprint.toCharArray()[3]!=32)
+                                    PomiarADC=(sbprint.toCharArray()[3]-'0');
+
+                                if(ciaglyBT&& tajemniczyLicznik!=1)
+                                    addEntry(PomiarADC);
+                                if(kalibracjaBT&& tajemniczyLicznik!=1)
+                                    wynikKalibracja+=PomiarADC;
+                                if(pomiarBT&& tajemniczyLicznik!=1)
+                                    wynikPomiar+=(PomiarADC-poziomZero);
+
                         }
+                        tajemniczyLicznik++;
                         break;
                 }
             };
@@ -233,8 +235,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isstop = true;
+                ciaglyBT=false;
+
                 try {
                     mConnectedThread.write("S");
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -246,10 +251,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isstop = false;
-                mConnectedThread = new ConnectedThread(btSocket);
+                tajemniczyLicznik=1;
+                ciaglyBT=true;
+               // mConnectedThread = new ConnectedThread(btSocket);
                 try {
                     mConnectedThread.write("C");
-                    mConnectedThread.start();
+                   // mConnectedThread.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -261,6 +268,16 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener pomiarclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pomiarBT=true;
+                tajemniczyLicznik=1;
+                wynikPomiar=0;
+
+                try {
+                    mConnectedThread.write("P");
+                 //   mConnectedThread.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 new postep().execute();
             }
         };
@@ -269,11 +286,22 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener kalibracjaclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                kalibracjaBT=true;
+                tajemniczyLicznik=1;
+                wynikKalibracja=0;
+
+                try {
+                    mConnectedThread.write("P");
+                   // mConnectedThread.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 new postep().execute();
                 brakPomiaru.setText("Kalibracja czujnika");
             }
         };
         kalibracja.setOnClickListener(kalibracjaclick);
+
         View.OnClickListener polaczclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -292,6 +320,8 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException e2) {
                     }
                 }
+                mConnectedThread = new ConnectedThread(btSocket);
+                mConnectedThread.start();
             }
         };
         polacz.setOnClickListener(polaczclick);
@@ -325,8 +355,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // wysyłanie danych do wykresu
-    // wysyłanie danych do wykresu
-    private void addEntry() {
+    private void addEntry(int pomiar) {
         LineData data = mChart.getData();
         if (data != null) {
             LineDataSet set = data.getDataSetByIndex(0);
@@ -336,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
             }
             // add a new random value
             data.addXValue("");
-            data.addEntry(new Entry((float) PomiarADC, set.getEntryCount()), 0);
+            data.addEntry(new Entry((float) pomiar, set.getEntryCount()), 0);
 
             mChart.notifyDataSetChanged();
             mChart.setVisibleXRange(6);
@@ -367,6 +396,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void OnPause() {
         try {
+            mConnectedThread.write("S");
             btSocket.close();
         } catch (IOException e2) {
         }
@@ -395,21 +425,21 @@ public class MainActivity extends AppCompatActivity {
 
         public void run() {
             byte[] buffer = new byte[4];  // buffer store for the stream
+
             int bytes; // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs
 
                     while (true){
                         try {
+                            //if(isstop==false){
+                                byte[] copyBuffer = buffer.clone();
                             // Read from the InputStream
-                            bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
-                           // czyOdebrano=true;
-                                 mHandler.obtainMessage(RECIEVE_MESSAGE, 4, -1, buffer).sendToTarget();     // Send to message queue Handler
-                                if (czyOdebrano)
-                                {
-                                    sleep(500);
-                                    czyOdebrano=false;
-                                }
+                            bytes = mmInStream.read(copyBuffer);        // Get number of bytes and message in "buffer"
+                                 mHandler.obtainMessage(RECIEVE_MESSAGE, bytes, -1, copyBuffer).sendToTarget();     // Send to message queue Handler
+                            sleep(250);
+
+
                         } catch (IOException e) {
                             ;
                         } catch (InterruptedException e) {
