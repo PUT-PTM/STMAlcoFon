@@ -10,7 +10,26 @@
 
 //zmienne globalne
 uint16_t ADC_Result;
-uint8_t czy_wysylac=0;//domyslnie wylaczony
+int8_t czy_wysylac=0;//domyslnie wylaczony
+int8_t dziwnie_wysylac=0;//domyslnie wylaczony
+
+void wyslijjako2bajty(uint16_t x)
+{
+	char bajty[2]={0,0};
+	if(x>255)
+	{
+	bajty[0]=x/256;
+	x=x-256*bajty[0];
+	bajty[1]=x;
+	}
+	else
+	{
+		bajty[0]=0;
+		bajty[1]=x;
+	}
+	usart_wyslijznak(bajty[0]);
+	usart_wyslijznak(bajty[1]);
+}
 
 void usart_wyslijznak(uint8_t znak)
 {
@@ -49,19 +68,31 @@ void USART3_IRQHandler(void)
 		{
 			czy_wysylac=-1;
 		}
-		if(temp=='S')//wylaczenie trybu ciaglego
-		{
-			czy_wysylac=0;
-		}
 		if(temp=='P')//pomiar lub kalibracja - wysylanie danych przez 5 sekund
 		{
 			czy_wysylac=20;//20 próbek wysylanych 4/s to daje 5 sekund
 		}
-		if(temp=='1')//pomiar lub kalibracja - wysylanie danych przez 5 sekund
+		if(temp=='T')//do testowania
 		{
-			czy_wysylac=1;//pojedyncza próbka
+			czy_wysylac=1;//wysylana pojedyncza próbka
 		}
-
+		if(temp=='S'||temp=='s')//wylaczenie trybu ciaglego
+		{
+			czy_wysylac=0;
+			dziwnie_wysylac=0;
+		}
+		if(temp=='t')//do testowania
+		{
+			dziwnie_wysylac=1;//wysylana pojedyncza próbka
+		}
+		if(temp=='c')//tryb ciagly - wysylanie jako 2 bajty
+		{
+			dziwnie_wysylac=-1;
+		}
+		if(temp=='p')//pomiar lub kalibracja - wysylanie danych przez 5 sekund
+		{
+			dziwnie_wysylac=20;//20 próbek wysylanych 4/s to daje 5 sekund
+		}
 	}
 }
 
@@ -135,7 +166,21 @@ void TIM5_IRQHandler(void)
 			usart_wyslijliczbe(ADC_Result);
 			czy_wysylac--;
 		}
-
+		if(dziwnie_wysylac==-1)//tryb ciagly
+		{
+			ADC_SoftwareStartConv(ADC1);
+			while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)==RESET);
+			ADC_Result=ADC_GetConversionValue(ADC1);
+			wyslijjako2bajty(ADC_Result);
+		}
+		if(dziwnie_wysylac>0)//tryb pomiaru/kalibracji/testu
+		{
+			ADC_SoftwareStartConv(ADC1);
+			while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)==RESET);
+			ADC_Result=ADC_GetConversionValue(ADC1);
+			wyslijjako2bajty(ADC_Result);
+			dziwnie_wysylac--;
+		}
 		GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15);
 		if(ADC_Result>150)
 		{
