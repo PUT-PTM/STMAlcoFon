@@ -43,6 +43,5 @@
         <Button x:Name="Odswiez" HorizontalAlignment="Stretch" Margin="305,560,10,0" VerticalAlignment="Top" Height="50" BorderThickness="0" Click="Odswiez_Click">
             <TextBlock x:Name="ikona_odswiez" Margin="-7,-17,0,0" Text="↻" FontSize="48"/>
         </Button>
-        <TextBlock x:Name="troll" HorizontalAlignment="Left" Margin="373,32,-86,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="73"/>
     </Grid>
 </Page>
