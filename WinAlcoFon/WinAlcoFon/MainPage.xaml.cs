@@ -2,23 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 using WinRTXamlToolkit.Controls.DataVisualization.Charting;
-using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
-using Windows.Devices.Enumeration.Pnp;
 using Windows.Storage.Streams;
 using Windows.Networking.Sockets;
 
@@ -47,7 +37,6 @@ namespace WinAlcoFon
         StreamSocket _socket;
         DataWriter WriterData;
         DataReader ReaderData;
-
         public MainPage()
         {
             this.InitializeComponent();
@@ -76,22 +65,20 @@ namespace WinAlcoFon
         }
         private async Task<int> pojedynczy_odczyt()
         {
-            byte[] b = new byte[4];
+            byte[] b = new byte[2];
             try
             {
-                await _socket.CancelIOAsync();//wyczyszczenie bufora
-                await ReaderData.LoadAsync(4);
+                await ReaderData.LoadAsync(2);
             }
             catch
             {
-                wypisz("Wystąpił błąd w transmisji danych, wykonaj pomiar jeszce raz","!BŁĄD!");
+                wypisz("Wystąpił błąd w transmisji danych, wykonaj pomiar jeszce raz", "!BŁĄD!");
                 return 0;
             }
             b[0] = ReaderData.ReadByte();
             b[1] = ReaderData.ReadByte();
-            b[2] = ReaderData.ReadByte();
-            b[3] = ReaderData.ReadByte();
-            int pomiar = Int32.Parse("" + (char)b[0] + (char)b[1] + (char)b[2] + (char)b[3]);
+            int pomiar = b[0] * 256 +b[1];
+            troll.Text = pomiar.ToString();
             return pomiar;
         }
         async void szukaj_bt()
@@ -126,7 +113,7 @@ namespace WinAlcoFon
             }
             catch (Exception)
             {
-                wypisz("Wystąpił błąd podczas wysyłania danych","!BŁĄD!");
+                wypisz("Wystąpił błąd podczas wysyłania danych", "!BŁĄD!");
             }
         }
         void blokuj_przyciski(bool zablokowane)
@@ -163,7 +150,6 @@ namespace WinAlcoFon
         }
         async void odswiez_wykres()
         {
-            Random rand = new Random();
             lista_danych.RemoveAt(lista_danych.IndexOf(lista_danych.First()));
             temp += 0.25;
             double wart = Math.Round((await pojedynczy_odczyt() - prog_0_promili) * przelicznik, 2);
@@ -175,7 +161,7 @@ namespace WinAlcoFon
             int suma = 0;
             int ilosc_probek = 20;
             Progres.Value = 0;
-            wyslij_przez_bt("P");
+            wyslij_przez_bt("p");
             for (int i = 0; i < ilosc_probek; i++)
             {
                 wypisz("", (ilosc_probek / 4 - i / 4) + " sekund");
@@ -193,18 +179,19 @@ namespace WinAlcoFon
             blokuj_przyciski(true);
             wypisz("\nTryb ciągłego odczytu rozpoczęty");
             Stop.IsEnabled = true;
-            wyslij_przez_bt("C");
+            wyslij_przez_bt("c");
+            await Task.Delay(250);
             while (uruchomione)
             {
                 odswiez_wykres();
-                await Task.Delay(250);
+                await Task.Delay(230);
             }
         }
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             wypisz("\nTryb ciągłego odczytu zakończony");
             blokuj_przyciski(false);
-            wyslij_przez_bt("S");
+            wyslij_przez_bt("s");
         }
         private async void Kalibruj_Click(object sender, RoutedEventArgs e)
         {
@@ -290,7 +277,7 @@ namespace WinAlcoFon
                 String czy_poczekac = "";
                 if (polaczono)
                 {
-                    wyslij_przez_bt("1");
+                    wyslij_przez_bt("t");
                     await Task.Delay(250);
                     int aktualny_odczyt = await pojedynczy_odczyt();
                     czy_poczekac = "\nAktualny odczyt to: " + aktualny_odczyt + "\n";
