@@ -49,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
     final int RECIEVE_MESSAGE = 1;
     private StringBuilder sb = new StringBuilder();
     private ConnectedThread mConnectedThread, mConnectedPomiar, mConnectedKalibracja;
-    public int PomiarADC, tajemniczyLicznik=1, poziomZero=120;
-    public float wynikKalibracja=0, wynikPomiar=0;
+    public int PomiarADC, tajemniczyLicznik=1, poziomZero=120, iloscProbek;
+    public float wynikKalibracja=0;
+    public int wynikPomiar=0;
+    public float przelicznik=(float)0.0021287379624937;
     public Handler mHandler;
 
 
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         YAxis y1 = mChart.getAxisLeft();
         y1.setTextColor(Color.WHITE);
-        y1.setAxisMaxValue(4000);
+        y1.setAxisMaxValue(9);
         y1.setDrawGridLines(true);
 
         YAxis y12 = mChart.getAxisRight();
@@ -133,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             wynikPomiaru.setText("");
+            if(pomiarBT){
+                Toast.makeText(getApplicationContext(),"dmuchaj przez 5 sekund.", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
@@ -146,8 +151,8 @@ public class MainActivity extends AppCompatActivity {
                         updateProgress(waited);
                     }
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+               // e.printStackTrace();
             }
             return null;
         }
@@ -155,17 +160,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             if(pomiarBT){
-                wynikPomiar/=20;
+                double wynik=0;
+                if(iloscProbek>0){
+                    wynik=wynikPomiar/iloscProbek;
+                }
+                wynik*=przelicznik;
                 pomiarBT=false;
                 wynikPomiaru.setText(" ");
-                Toast.makeText(getApplicationContext(),"wynik wynosi: "+ wynikPomiar, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"możesz przestać dmuchać, trwa liczenie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"wynik wynosi: "+ wynik, Toast.LENGTH_SHORT).show();
+                wynikPomiaru.setText("wynik pomiaru: " + wynik + " ‰");
 
             }
             if(kalibracjaBT){
-                poziomZero=(int)(wynikKalibracja/20);
+                if(iloscProbek>0)
+                    poziomZero=(int)(wynikKalibracja/iloscProbek);
                 kalibracjaBT=false;
+                przelicznik= (float) (8.4/(4096-poziomZero));
                 brakPomiaru.setText("kalibracja zakonczona");
                 Toast.makeText(getApplicationContext(),"poziom zero wynosi: "+ poziomZero, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"przeliczniik: : "+ przelicznik, Toast.LENGTH_SHORT).show();
 
             }
         }
@@ -217,12 +231,23 @@ public class MainActivity extends AppCompatActivity {
                                 else if(sbprint.toCharArray()[0]==32&& sbprint.toCharArray()[1]==32 && sbprint.toCharArray()[2]==32 && sbprint.toCharArray()[3]!=32)
                                     PomiarADC=(sbprint.toCharArray()[3]-'0');
 
-                                if(ciaglyBT&& tajemniczyLicznik!=1)
-                                    addEntry(PomiarADC);
-                                if(kalibracjaBT&& tajemniczyLicznik!=1)
+                                if(ciaglyBT&& tajemniczyLicznik!=1){
+                                    float tempWynik=(PomiarADC-poziomZero)*przelicznik;
+                                    if((PomiarADC-poziomZero)>0)
+                                        addEntry(tempWynik);
+                                    else
+                                        addEntry(0);
+
+                                }
+                            if(kalibracjaBT&& tajemniczyLicznik!=1) {
                                     wynikKalibracja+=PomiarADC;
-                                if(pomiarBT&& tajemniczyLicznik!=1)
+                                iloscProbek++;
+                                }
+                                if(pomiarBT&& tajemniczyLicznik!=1){
                                     wynikPomiar+=(PomiarADC-poziomZero);
+                                    iloscProbek++;
+
+                                }
 
                         }
                         tajemniczyLicznik++;
@@ -240,12 +265,13 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     mConnectedThread.write("S");
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                  //  e.printStackTrace();
                 }
             }
         };
         stop.setOnClickListener(stopclick);
+
         // Listener przycisku start
         View.OnClickListener pstartclick = new View.OnClickListener() {
             @Override
@@ -257,44 +283,47 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     mConnectedThread.write("C");
                    // mConnectedThread.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                  //  e.printStackTrace();
                 }
-                //new OdczytCiagly().execute();
             }
         };
         pstart.setOnClickListener(pstartclick);
+
         // listener przycisku pomiar
         View.OnClickListener pomiarclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pomiarBT=true;
                 tajemniczyLicznik=1;
+                iloscProbek=0;
                 wynikPomiar=0;
 
                 try {
                     mConnectedThread.write("P");
                  //   mConnectedThread.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                   // e.printStackTrace();
                 }
                 new postep().execute();
             }
         };
         pomiar.setOnClickListener(pomiarclick);
+
         // listener przycisku kalibracja
         View.OnClickListener kalibracjaclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 kalibracjaBT=true;
                 tajemniczyLicznik=1;
+                iloscProbek=0;
                 wynikKalibracja=0;
 
                 try {
                     mConnectedThread.write("P");
                    // mConnectedThread.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                   // e.printStackTrace();
                 }
                 new postep().execute();
                 brakPomiaru.setText("Kalibracja czujnika");
@@ -309,15 +338,15 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = btAdapter.getRemoteDevice(address);
                 try {
                     btSocket = createBluetoothSocket(device);
-                } catch (IOException e) {
+                } catch (Exception e) {
                 }
 
                 try {
                     btSocket.connect();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     try {
                         btSocket.close();
-                    } catch (IOException e2) {
+                    } catch (Exception e1) {
                     }
                 }
                 mConnectedThread = new ConnectedThread(btSocket);
@@ -355,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // wysyłanie danych do wykresu
-    private void addEntry(int pomiar) {
+    private void addEntry(float pomiar) {
         LineData data = mChart.getData();
         if (data != null) {
             LineDataSet set = data.getDataSetByIndex(0);
@@ -365,13 +394,11 @@ public class MainActivity extends AppCompatActivity {
             }
             // add a new random value
             data.addXValue("");
-            data.addEntry(new Entry((float) pomiar, set.getEntryCount()), 0);
+            data.addEntry(new Entry(pomiar, set.getEntryCount()), 0);
 
             mChart.notifyDataSetChanged();
-            mChart.setVisibleXRange(6);
+            mChart.setVisibleXRange(10);
             mChart.moveViewToX(data.getXValCount() - 7);
-            PomiarADC=0;
-            czyOdebrano=true;
         }
     }
 
@@ -398,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             mConnectedThread.write("S");
             btSocket.close();
-        } catch (IOException e2) {
+        } catch (Exception e) {
         }
     }
 
@@ -416,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException e) {
+            } catch (Exception  e) {
             }
 
             mmInStream = tmpIn;
@@ -440,10 +467,8 @@ public class MainActivity extends AppCompatActivity {
                             sleep(250);
 
 
-                        } catch (IOException e) {
-                            ;
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        }  catch (Exception e) {
+                           // e.printStackTrace();
                         }
                     }
 

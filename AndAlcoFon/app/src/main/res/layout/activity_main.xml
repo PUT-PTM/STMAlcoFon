@@ -29,22 +29,11 @@ android:background="@color/colorbaza">
     android:layout_y="189dp"
     android:background="@color/colorbaza" />
 
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    android:text="                Wynik pomiaru"
-    android:id="@+id/textView2"
-    android:layout_x="84dp"
-    android:layout_y="253dp"
-    android:background="@color/colorbaza"
-    android:singleLine="true" />
-
-<TextView
+    <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="?android:attr/textAppearanceLarge"
-    android:text="                     Nie dokonano pomiaru"
+    android:text="                  Nie dokonano pomiaru"
     android:id="@+id/brakPomiaru"
     android:layout_x="0dp"
     android:layout_y="302dp"
@@ -94,13 +83,13 @@ android:background="@color/colorbaza">
         android:id="@+id/wykres"></RelativeLayout>
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text=""
         android:id="@+id/wynikPomiaru"
-        android:layout_x="255dp"
-        android:layout_y="255dp" />
+        android:layout_x="101dp"
+        android:layout_y="252dp" />
 
 
 </AbsoluteLayout>
