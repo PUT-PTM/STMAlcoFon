@@ -5,7 +5,7 @@ STMAlcoFon is simple breathalyzer project.
 In our project we use MQ-3 sensor to detect alcohol in exhaled air and measure it. Measurments will be sent via HC-05 bluetooth module to smartphone to present results (graphs, history, etc). Project will be available for smartphones working on Android and Windows Mobile 10 operating systems. Project will also be available on PCs (Windows 10) thanks to Universal Windows Platform. Bluetooth module and alcohol sensor will be atached to STM32F4 device.
 <h2>Tools</h2>
 Android Studio 1.5</br>
-Visual Studio 2015</br>
+Visual Studio 2015 + Windows 10 SDK</br>
 CooCox CoIDE</br>
 STM Studio
 <h2>How to run</h2>
@@ -14,7 +14,7 @@ STM Studio
 Reconnect to device after comunication problem (in both platforms).
 Stop conitnous reading on exit (in UWP platform).
 <h2>Attributions</h2>
-Generate chart in adnrodi app: https://github.com/PhilJay/MPAndroidChart </br>
+Generate chart in adnroid app: https://github.com/PhilJay/MPAndroidChart </br>
 Comunication between android and HC-05: https://developer.android.com/guide/topics/connectivity/bluetooth.html
 <h2>License</h2>
 MIT - more information on LICENSE file.
