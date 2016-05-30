@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             wynikPomiaru.setText("");
             if(pomiarBT){
-                Toast.makeText(getApplicationContext(),"dmuchaj przez 5 sekund.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"dmuchaj przez 5 sekund.", Toast.LENGTH_LONG).show();
             }
         }
 
@@ -160,16 +160,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             if(pomiarBT){
-                double wynik=0;
+                double tempwynik=0;
                 if(iloscProbek>0){
-                    wynik=wynikPomiar/iloscProbek;
+                    tempwynik=wynikPomiar/iloscProbek;
                 }
-                wynik*=przelicznik;
+                tempwynik*=przelicznik;
                 pomiarBT=false;
                 wynikPomiaru.setText(" ");
                 Toast.makeText(getApplicationContext(),"możesz przestać dmuchać, trwa liczenie", Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(),"wynik wynosi: "+ wynik, Toast.LENGTH_SHORT).show();
+                double wynik=(double) Math.round(tempwynik * 100) / 100;
                 wynikPomiaru.setText("wynik pomiaru: " + wynik + " ‰");
+                brakPomiaru.setText("Pomiar zakonczony");
 
             }
             if(kalibracjaBT){
@@ -177,9 +178,9 @@ public class MainActivity extends AppCompatActivity {
                     poziomZero=(int)(wynikKalibracja/iloscProbek);
                 kalibracjaBT=false;
                 przelicznik= (float) (8.4/(4096-poziomZero));
-                brakPomiaru.setText("kalibracja zakonczona");
-                Toast.makeText(getApplicationContext(),"poziom zero wynosi: "+ poziomZero, Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(),"przeliczniik: : "+ przelicznik, Toast.LENGTH_SHORT).show();
+                brakPomiaru.setText("Kalibracja zakonczona");
+                Toast.makeText(getApplicationContext(),"Poziom zero wynosi: "+ poziomZero, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"przelicznik: "+ przelicznik, Toast.LENGTH_SHORT).show();
 
             }
         }
@@ -246,7 +247,6 @@ public class MainActivity extends AppCompatActivity {
                                 if(pomiarBT&& tajemniczyLicznik!=1){
                                     wynikPomiar+=(PomiarADC-poziomZero);
                                     iloscProbek++;
-
                                 }
 
                         }
@@ -306,6 +306,7 @@ public class MainActivity extends AppCompatActivity {
                    // e.printStackTrace();
                 }
                 new postep().execute();
+                brakPomiaru.setText("Pomiar Trwa");
             }
         };
         pomiar.setOnClickListener(pomiarclick);
