@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="228d372e-ef10-4ffb-a95b-14bc8ae0e48d2" Publisher="CN=tomek" Version="1.0.0.0" />
+  <Identity Name="228d372e-ef10-4ffb-a95b-14bc8ae0e48d2" Publisher="CN=Guziec94" Version="1.0.0.0" />
   <mp:PhoneIdentity PhoneProductId="228d372e-ef10-4ffb-a95b-14bc8ae0e48d" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>WinAlcoFon</DisplayName>
@@ -22,6 +22,9 @@
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#ff8c00" />
+        <uap:InitialRotationPreference>
+          <uap:Rotation Preference="portrait" />
+        </uap:InitialRotationPreference>
       </uap:VisualElements>
     </Application>
   </Applications>

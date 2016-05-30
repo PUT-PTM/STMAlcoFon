@@ -42,10 +42,9 @@ namespace WinAlcoFon
             this.InitializeComponent();
             ((LineSeries)LineChart.Series[0]).DependentRangeAxis = new LinearAxis()
             {
-                //Maximum = 0.5,
-                //Minimum = -0.5,
                 Orientation = AxisOrientation.Y,
-                ShowGridLines = true
+                ShowGridLines = true,
+                UseLayoutRounding=true
             };
             zaladuj_wykres();
             blokuj_przyciski(true);
@@ -109,7 +108,7 @@ namespace WinAlcoFon
                 WriterData.WriteString(msg);
                 WriterData.StoreAsync();
             }
-            catch (Exception)
+            catch
             {
                 wypisz("Wystąpił błąd podczas wysyłania danych", "!BŁĄD!");
             }
@@ -140,7 +139,7 @@ namespace WinAlcoFon
             temp = 0;
             lista_danych.Clear();
             Random rand = new Random();
-            for (double i = -5; i <= 0; i += 0.25)
+            for (double i = -4; i <= 0; i += 0.25)
             {
                 lista_danych.Add(new dane_do_wykresu() { id = i, wartosc = 0 });
             }
@@ -180,21 +179,19 @@ namespace WinAlcoFon
             while(uruchomione)
             {
                 wyslij_przez_bt("t");
-                await Task.Delay(50);
+                await Task.Delay(100);
                 odswiez_wykres();
-                await Task.Delay(200);
+                await Task.Delay(100);
             }
         }
         void Stop_Click(object sender, RoutedEventArgs e)
         {
+            wyslij_przez_bt("s");
             wypisz("\nTryb ciągłego odczytu zakończony");
             blokuj_przyciski(false);
         }
         async void Kalibruj_Click(object sender, RoutedEventArgs e)
         {
-            //kilka odczytów na suchym powietrzu i usrednienie wyniku
-            //wynik odjac od maksimum jakie moze odczytac wynik i podzielic 
-            //pomiary otrzymywane przez BT mnozyc przez ostateczny wynik by otrzymać ‰
             blokuj_przyciski(true);
             wypisz("\nPozostało", "");
             pomiar();
@@ -273,7 +270,7 @@ namespace WinAlcoFon
                 if (polaczono)
                 {
                     wyslij_przez_bt("t");
-                    await Task.Delay(50);
+                    await Task.Delay(100);
                     int aktualny_odczyt = await pojedynczy_odczyt();
                     wiadomosc_popup = "\nAktualny odczyt to: " + aktualny_odczyt + "\n";
                     if (aktualny_odczyt <= 150)
@@ -296,7 +293,7 @@ namespace WinAlcoFon
                     "przelicznik: " + przelicznik + '\n' +
                     "nieprzeliczony ostatni pomiar: " + usredniony_wynik +
                     wiadomosc_popup,
-                    "Informacje ogólne i uwagi");//tytuł po przecinku
+                    "Informacje ogólne i uwagi");
                 dialog.Commands.Add(new Windows.UI.Popups.UICommand("OK") { Id = 0 });
                 var result = await dialog.ShowAsync();
             }
