@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <history>
    <processor signature="arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -g -nostartfiles -Map=StmAlcoFon.map -O0 --gc-sections -LC:\CooCox\CoIDE\configuration\ProgramData\StmAlcoFon -TC:\CooCox\CoIDE\configuration\ProgramData\StmAlcoFon/arm-gcc-link.ld -g">
-      <target file="StmAlcoFon.elf" lastModified="154bb1e5ba1">
+      <target file="StmAlcoFon.elf" lastModified="155030cf0ab">
          <source file="..\obj\stm32f4xx_syscfg.o" lastModified="1544ea313dc"/>
          <source file="..\obj\stm32f4xx_usart.o" lastModified="1544ea31437"/>
          <source file="..\obj\startup_stm32f4xx.o" lastModified="1544ea3146a"/>
-         <source file="..\obj\main.o" lastModified="154bb1e59a4"/>
+         <source file="..\obj\main.o" lastModified="155030ced62"/>
          <source file="..\obj\stm32f4xx_rcc.o" lastModified="1544ea3153e"/>
          <source file="..\obj\stm32f4xx_adc.o" lastModified="1544ea315b2"/>
          <source file="..\obj\stm32f4xx_gpio.o" lastModified="1544ea31614"/>

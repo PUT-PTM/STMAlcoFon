@@ -90,7 +90,7 @@ void USART3_IRQHandler(void)
 				break;
 			case't'://do testowania
 				dziwnie_wysylac=1;//wysylana pojedyncza próbka
-				TIM5->CNT=245;
+				TIM5->CNT=2450;
 				break;
 			case'c'://tryb ciagly - wysylanie jako 2 bajty
 				dziwnie_wysylac=-1;
