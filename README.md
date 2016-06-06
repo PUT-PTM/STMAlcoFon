@@ -25,7 +25,7 @@ Reconnect to device after comunication problem (in both platforms).</br>
 Stop conitnous reading on exit (in UWP platform).</br>
 Sign WinAlcoFon to avoid turning on developer mode.</br>
 <h2>Attributions</h2>
-Generate chart in adnroid app: https://github.com/PhilJay/MPAndroidChart </br>
+Generate chart in android app: https://github.com/PhilJay/MPAndroidChart </br>
 Comunication between android and HC-05: https://developer.android.com/guide/topics/connectivity/bluetooth.html
 <h2>License</h2>
 MIT - more information on LICENSE file.
